@@ -641,6 +641,35 @@
     color: #98a2b3;
 }
 
+.password-field {
+    position: relative;
+}
+
+.password-field input {
+    padding-right: 42px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    cursor: pointer;
+}
+
+.password-toggle:hover {
+    color: #5946ff;
+}
+
 
 /* =========================================
    VALIDATION ERRORS

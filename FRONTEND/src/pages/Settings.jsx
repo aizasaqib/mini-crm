@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
 import "../styles/Customers.css";
 
@@ -12,6 +13,38 @@ const getUser = () => {
 };
 
 const BASE = import.meta.env.VITE_API_URL;
+
+const Field = ({ label, value, onChange, type = "text", disabled = false, placeholder = "", showToggle = false }) => {
+  const [visible, setVisible] = useState(false);
+  const inputType = showToggle && visible ? "text" : type;
+
+  return (
+    <div className="form-group">
+      <label>{label}</label>
+      <div className={showToggle ? "password-field" : ""}>
+        <input
+          type={inputType}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          placeholder={placeholder}
+          style={disabled ? { background: "#f9fafb", color: "#9ca3af" } : {}}
+        />
+        {showToggle && (
+          <button
+            type="button"
+            className="password-toggle"
+            aria-label={visible ? "Hide password" : "Show password"}
+            onMouseDown={event => event.preventDefault()}
+            onClick={() => setVisible(previous => !previous)}
+          >
+            {visible ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -100,18 +133,6 @@ const Settings = () => {
     setPassLoading(false);
   };
 
-  // ── Helpers ───────────────────────────────────────────────
-  const Field = ({ label, value, onChange, type = "text", disabled = false, placeholder = "" }) => (
-    <div className="form-group">
-      <label>{label}</label>
-      <input
-        type={type} value={value} onChange={onChange} disabled={disabled}
-        placeholder={placeholder}
-        style={disabled ? { background: "#f9fafb", color: "#9ca3af" } : {}}
-      />
-    </div>
-  );
-
   return (
     <div className="customers-layout">
       <Sidebar active="/profile" />
@@ -183,6 +204,7 @@ const Settings = () => {
                 label="Current Password"
                 value={passwords.current}
                 type="password"
+                showToggle
                 onChange={e => setPasswords(p => ({ ...p, current: e.target.value }))}
                 placeholder="••••••••"
               />
@@ -191,6 +213,7 @@ const Settings = () => {
                   label="New Password"
                   value={passwords.newPass}
                   type="password"
+                  showToggle
                   onChange={e => setPasswords(p => ({ ...p, newPass: e.target.value }))}
                   placeholder="••••••••"
                 />
@@ -198,6 +221,7 @@ const Settings = () => {
                   label="Confirm New Password"
                   value={passwords.confirm}
                   type="password"
+                  showToggle
                   onChange={e => setPasswords(p => ({ ...p, confirm: e.target.value }))}
                   placeholder="••••••••"
                 />
