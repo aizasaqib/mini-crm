@@ -17,6 +17,13 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Customers from "./pages/customers";
 
 
+import Leads from "./pages/Leads";
+import Deals from "./pages/Deals";
+import Tasks from "./pages/Tasks";
+import Activities from "./pages/Activities";
+import Reports from "./pages/Reports";
+import Settings from "./pages/Settings";
+
 function PublicRoute({ children }) {
 
   const user = localStorage.getItem("user");
@@ -139,6 +146,14 @@ function App() {
         />
 
 
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/leads" element={<Leads />} />
+        <Route path="/deals" element={<Deals />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/activities" element={<Activities />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+
         {/* =========================
             UNKNOWN ROUTE
         ========================= */}
@@ -152,7 +167,6 @@ function App() {
             />
           }
         />
-        <Route path="/customers" element={<Customers />} />
 
       </Routes>
 

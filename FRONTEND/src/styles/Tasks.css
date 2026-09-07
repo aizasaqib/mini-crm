@@ -1,0 +1,745 @@
+/* =====================================================
+   TASKS PAGE
+===================================================== */
+
+.tasks-page {
+  min-height: 100vh;
+  padding: 28px 50px 60px;
+  background: #f7f8fc;
+  box-sizing: border-box;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.tasks-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.tasks-header h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 700;
+  color: #101828;
+}
+
+.tasks-header p {
+  margin: 18px 0 0;
+  font-size: 19px;
+  color: #667085;
+}
+
+
+/* =====================================================
+   ADD TASK BUTTON
+===================================================== */
+
+.add-task-btn {
+  border: none;
+  background: #6346f5;
+  color: white;
+  height: 64px;
+  padding: 0 30px;
+  border-radius: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.add-task-btn:hover {
+  background: #5437e6;
+  transform: translateY(-1px);
+}
+
+.add-task-btn svg {
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   MAIN CARD
+===================================================== */
+
+.tasks-card {
+  background: white;
+  border-radius: 22px;
+  padding: 34px;
+  box-shadow: 0 8px 30px rgba(31, 41, 55, 0.06);
+}
+
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.tasks-toolbar {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) 190px 190px 170px;
+  gap: 16px;
+  margin-bottom: 34px;
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.task-search {
+  height: 60px;
+  border: 1px solid #d9dfeb;
+  border-radius: 13px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.task-search svg {
+  color: #667085;
+  font-size: 15px;
+  margin-right: 14px;
+}
+
+.task-search input {
+  border: none;
+  outline: none;
+  width: 100%;
+
+  font-size: 17px;
+  color: #344054;
+  background: transparent;
+}
+
+.task-search input::placeholder {
+  color: #98a2b3;
+}
+
+
+/* =====================================================
+   SELECTS
+===================================================== */
+
+.tasks-toolbar select {
+  height: 60px;
+  border: 1px solid #d9dfeb;
+  border-radius: 13px;
+
+  padding: 0 17px;
+
+  font-size: 16px;
+  color: #344054;
+  background: white;
+
+  outline: none;
+  cursor: pointer;
+}
+
+.tasks-toolbar select:focus {
+  border-color: #6346f5;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.tasks-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
+.tasks-table thead tr {
+  background: #f8f9fc;
+}
+
+.tasks-table th {
+  text-align: left;
+  padding: 22px 22px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  color: #667085;
+  letter-spacing: 0.3px;
+}
+
+
+/* =====================================================
+   TABLE BODY
+===================================================== */
+
+.tasks-table td {
+  padding: 23px 22px;
+
+  border-bottom: 1px solid #eaecf0;
+
+  color: #344054;
+  font-size: 16px;
+}
+
+.tasks-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* =====================================================
+   TASK INFO
+===================================================== */
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-info strong {
+  color: #101828;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.task-info span {
+  color: #98a2b3;
+  font-size: 13px;
+
+  max-width: 260px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+
+/* =====================================================
+   DUE DATE
+===================================================== */
+
+.due-date {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  white-space: nowrap;
+}
+
+.due-date svg {
+  color: #667085;
+  font-size: 14px;
+}
+
+
+/* =====================================================
+   PRIORITY BADGES
+===================================================== */
+
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.priority-badge.high {
+  background: #fee4e2;
+  color: #d92d20;
+}
+
+.priority-badge.medium {
+  background: #fff3cd;
+  color: #b54708;
+}
+
+.priority-badge.low {
+  background: #e8f1ff;
+  color: #175cd3;
+}
+
+
+/* =====================================================
+   STATUS BADGES
+===================================================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fff3cd;
+  color: #b54708;
+}
+
+.status-badge.in-progress {
+  background: #e8f1ff;
+  color: #175cd3;
+}
+
+.status-badge.completed {
+  background: #d1fadf;
+  color: #027a48;
+}
+
+.status-badge svg {
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   ASSIGNED USER
+===================================================== */
+
+.assigned-user {
+  color: #475467;
+  font-weight: 500;
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.actions-cell {
+  position: relative;
+  width: 80px;
+}
+
+.action-menu-btn {
+  border: none;
+  background: transparent;
+
+  color: #98a2b3;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.action-menu-btn:hover {
+  background: #f2f4f7;
+  color: #475467;
+}
+
+
+/* =====================================================
+   ACTION DROPDOWN
+===================================================== */
+
+.action-menu {
+  position: absolute;
+
+  right: 20px;
+  top: 58px;
+
+  width: 145px;
+
+  background: white;
+
+  border: 1px solid #eaecf0;
+  border-radius: 10px;
+
+  padding: 6px;
+
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.12);
+
+  z-index: 20;
+}
+
+.action-menu button {
+  width: 100%;
+
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 11px 10px;
+
+  border-radius: 7px;
+
+  color: #344054;
+
+  font-size: 14px;
+
+  cursor: pointer;
+
+  text-align: left;
+}
+
+.action-menu button:hover {
+  background: #f2f4f7;
+}
+
+.action-menu .delete-action {
+  color: #d92d20;
+}
+
+
+/* =====================================================
+   NO TASKS
+===================================================== */
+
+.no-tasks {
+  height: 180px;
+
+  text-align: center;
+
+  color: #98a2b3;
+
+  font-size: 16px;
+}
+
+.no-tasks svg {
+  display: block;
+
+  margin: 0 auto 12px;
+
+  font-size: 25px;
+}
+
+
+/* =====================================================
+   MODAL OVERLAY
+===================================================== */
+
+.task-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(16, 24, 40, 0.45);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  z-index: 1000;
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.task-modal {
+  width: 100%;
+  max-width: 650px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 20px;
+
+  padding: 30px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 20px 60px rgba(16, 24, 40, 0.2);
+}
+
+
+/* =====================================================
+   MODAL HEADER
+===================================================== */
+
+.task-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 30px;
+}
+
+.task-modal-header h2 {
+  margin: 0;
+
+  font-size: 25px;
+
+  color: #101828;
+}
+
+.task-modal-header p {
+  margin: 7px 0 0;
+
+  color: #667085;
+
+  font-size: 14px;
+}
+
+.close-modal-btn {
+  border: none;
+
+  background: #f2f4f7;
+
+  color: #667085;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.close-modal-btn:hover {
+  background: #eaecf0;
+}
+
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  margin-bottom: 8px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #344054;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 10px;
+
+  padding: 13px 14px;
+
+  font-size: 15px;
+
+  color: #344054;
+
+  background: white;
+
+  outline: none;
+
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #6346f5;
+
+  box-shadow: 0 0 0 3px rgba(99, 70, 245, 0.08);
+}
+
+
+/* =====================================================
+   FORM ROW
+===================================================== */
+
+.form-row {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 18px;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.input-error {
+  border-color: #f04438 !important;
+}
+
+.error-message {
+  margin-top: 6px;
+
+  font-size: 12px;
+
+  color: #d92d20;
+}
+
+
+/* =====================================================
+   MODAL BUTTONS
+===================================================== */
+
+.modal-buttons {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 12px;
+
+  margin-top: 10px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #eaecf0;
+}
+
+.cancel-btn,
+.save-task-btn {
+  height: 45px;
+
+  padding: 0 22px;
+
+  border-radius: 9px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.cancel-btn {
+  border: 1px solid #d0d5dd;
+
+  background: white;
+
+  color: #344054;
+}
+
+.cancel-btn:hover {
+  background: #f9fafb;
+}
+
+.save-task-btn {
+  border: none;
+
+  background: #6346f5;
+
+  color: white;
+}
+
+.save-task-btn:hover {
+  background: #5437e6;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .tasks-page {
+    padding: 25px;
+  }
+
+  .tasks-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .tasks-page {
+    padding: 20px 15px;
+  }
+
+  .tasks-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .tasks-header h1 {
+    font-size: 34px;
+  }
+
+  .add-task-btn {
+    width: 100%;
+  }
+
+  .tasks-card {
+    padding: 20px;
+  }
+
+  .tasks-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .task-modal {
+    padding: 22px;
+  }
+
+}

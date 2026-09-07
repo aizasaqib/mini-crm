@@ -1,44 +1,62 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Customers.css";
+import Sidebar from "../components/Sidebar";
 
 const Customers = () => {
 
     const navigate = useNavigate();
 
+    // Safely reads token from localStorage — handles "undefined" string
+    const getToken = () => {
+        try {
+            const userStr = localStorage.getItem("user");
+            if (!userStr || userStr === "undefined" || userStr === "null") return null;
+            return JSON.parse(userStr).token || null;
+        } catch {
+            return null;
+        }
+    };
+
     // Controls whether the Add Customer modal is visible
     const [showModal, setShowModal] = useState(false);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const [purchaseCustomer, setPurchaseCustomer] = useState(null);
+    const [purchases, setPurchases] = useState([]);
+    const [purchaseForm, setPurchaseForm] = useState({ title: "", amount: "" });
+    const [purchaseError, setPurchaseError] = useState("");
     
 
     // Customer list
-    const [customers, setCustomers] = useState([
-        {
-            name: "John Doe",
-            email: "john@example.com",
-            phone: "0300-1234567",
-            company: "Acme Inc.",
-            status: "Active",
-            deals: 4
-        },
-        {
-            name: "Sarah Khan",
-            email: "sarah@example.com",
-            phone: "0312-7654321",
-            company: "XYZ Corp.",
-            status: "Active",
-            deals: 2
-        },
-        {
-            name: "Mike Brown",
-            email: "mike@example.com",
-            phone: "0321-4567890",
-            company: "Tech Solutions",
-            status: "Lead",
-            deals: 1
+    const [customers, setCustomers] = useState([]);
+
+    const fetchCustomers = async () => {
+        try {
+            const token = getToken();
+            if (!token) { navigate("/login"); return; }
+
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/customers`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setCustomers(data);
+            } else {
+                console.error("Failed to fetch customers:", res.status);
+            }
+        } catch (error) {
+            console.error("Failed to fetch customers", error);
         }
-    ]);
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+    }, []);
+
+    // Track which customer is being edited (null = add mode)
+    const [editCustomer, setEditCustomer] = useState(null);
 
     // Form data
     const [formData, setFormData] = useState({
@@ -52,6 +70,93 @@ const Customers = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [submitError, setSubmitError] = useState("");
+
+    // Open edit modal pre-filled with customer data
+    const handleEdit = (customer) => {
+        const [firstName, ...rest] = (customer.name || "").split(" ");
+        setFormData({
+            firstName: firstName || "",
+            lastName: rest.join(" ") || "",
+            email: customer.email || "",
+            phone: customer.phone || "",
+            company: customer.company || "",
+            status: customer.status || "Active",
+            notes: ""
+        });
+        setEditCustomer(customer);
+        setErrors({});
+        setSubmitError("");
+        setShowModal(true);
+    };
+
+    // Delete a customer
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this customer? This cannot be undone.")) return;
+        try {
+            const token = getToken();
+            if (!token) { navigate("/login"); return; }
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/customers/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            if (res.ok) {
+                fetchCustomers();
+            } else {
+                alert("Failed to delete customer.");
+            }
+        } catch {
+            alert("Network error while deleting.");
+        }
+    };
+
+    const openPurchases = (customer) => {
+        setPurchaseCustomer(customer);
+        setPurchases(customer.purchases || []);
+        setPurchaseForm({ title: "", amount: "" });
+        setPurchaseError("");
+    };
+
+    const handlePurchaseSubmit = async (event) => {
+        event.preventDefault();
+        if (!purchaseForm.title.trim() || purchaseForm.amount === "" || Number(purchaseForm.amount) < 0) {
+            setPurchaseError("Enter a title and a valid amount.");
+            return;
+        }
+
+        try {
+            const token = getToken();
+            if (!token) { navigate("/login"); return; }
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/customers/${purchaseCustomer._id}/purchases`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify(purchaseForm)
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                setPurchaseError(data.message || "Failed to add purchase.");
+                return;
+            }
+            setPurchases(previous => [data, ...previous]);
+            setCustomers(previous => previous.map(customer => customer._id === purchaseCustomer._id
+                ? {
+                    ...customer,
+                    purchases: [data, ...(customer.purchases || [])],
+                    balance: (customer.balance || 0) + data.amount
+                }
+                : customer
+            ));
+            setPurchaseCustomer(previous => ({
+                ...previous,
+                purchases: [data, ...(previous.purchases || [])],
+                balance: (previous.balance || 0) + data.amount
+            }));
+            setPurchaseForm({ title: "", amount: "" });
+            setPurchaseError("");
+        } catch {
+            setPurchaseError("Network error while adding purchase.");
+        }
+    };
 
     const validateForm = () => {
 
@@ -60,41 +165,13 @@ const Customers = () => {
     // First name
     if (!formData.firstName.trim()) {
         newErrors.firstName = "First name is required";
-    } else if (!/^[A-Za-z]+$/.test(formData.firstName)) {
-        newErrors.firstName = "First name should contain only letters";
-    }
-
-    // Last name
-    if (!formData.lastName.trim()) {
-        newErrors.lastName = "Last name is required";
-    } else if (!/^[A-Za-z]+$/.test(formData.lastName)) {
-        newErrors.lastName = "Last name should contain only letters";
     }
 
     // Email
     if (!formData.email.trim()) {
         newErrors.email = "Email is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
         newErrors.email = "Enter a valid email address";
-    }
-
-    // Phone
-    if (!formData.phone.trim()) {
-        newErrors.phone = "Phone number is required";
-    } else if (!/^\d+$/.test(formData.phone)) {
-        newErrors.phone = "Phone number should contain only digits";
-    } else if (formData.phone.length !== 11) {
-        newErrors.phone = "Phone number must be exactly 11 digits";
-    }
-
-    // Company
-    if (!formData.company.trim()) {
-        newErrors.company = "Company is required";
-    }
-
-    // Status
-    if (!formData.status) {
-        newErrors.status = "Status is required";
     }
 
     setErrors(newErrors);
@@ -122,54 +199,60 @@ const Customers = () => {
     };
 
 
-    // Add new customer
-   const handleSubmit = (e) => {
+    // Add or update customer
+   const handleSubmit = async (e) => {
 
     e.preventDefault();
+    setSubmitError("");
 
-    // Stop if validation fails
-    if (!validateForm()) {
-        return;
-    }
+    if (!validateForm()) return;
 
-    const newCustomer = {
-        name: `${formData.firstName} ${formData.lastName}`,
+    const customerData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
         status: formData.status,
-        deals: 0
     };
 
-    setCustomers([
-        ...customers,
-        newCustomer
-    ]);
+    try {
+        const token = getToken();
+        if (!token) { setSubmitError("Session expired. Please log in again."); navigate("/login"); return; }
 
-    // Clear form
-    setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        company: "",
-        status: "Active",
-        notes: ""
-    });
+        const url = editCustomer
+            ? `${import.meta.env.VITE_API_URL}/api/customers/${editCustomer._id}`
+            : `${import.meta.env.VITE_API_URL}/api/customers`;
+        const method = editCustomer ? "PUT" : "POST";
 
-    // Clear errors
-    setErrors({});
+        const res = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify(customerData)
+        });
 
-    // Close modal
-    setShowModal(false);
+        if (res.ok) {
+            fetchCustomers();
+            setFormData({ firstName: "", lastName: "", email: "", phone: "", company: "", status: "Active", notes: "" });
+            setErrors({});
+            setSubmitError("");
+            setEditCustomer(null);
+            setShowModal(false);
+        } else {
+            const errData = await res.json().catch(() => ({}));
+            setSubmitError(errData.message || `Error ${res.status}: Failed to save customer`);
+        }
+    } catch (error) {
+        setSubmitError("Network error. Please check your connection.");
+        console.error("Error saving customer", error);
+    }
 };
 const filteredCustomers = customers.filter((customer) => {
 
     const matchesSearch =
-        customer.name.toLowerCase().includes(search.toLowerCase()) ||
-        customer.email.toLowerCase().includes(search.toLowerCase()) ||
-        customer.phone.includes(search) ||
-        customer.company.toLowerCase().includes(search.toLowerCase());
+        (customer.name || "").toLowerCase().includes(search.toLowerCase()) ||
+        (customer.email || "").toLowerCase().includes(search.toLowerCase()) ||
+        (customer.phone || "").includes(search) ||
+        (customer.company || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
         statusFilter === "All" ||
@@ -180,99 +263,17 @@ const filteredCustomers = customers.filter((customer) => {
     return (
         <div className="customers-layout">
 
+            {/* Click-outside overlay to close any open dropdown */}
+            {openMenuId && (
+                <div style={{ position: 'fixed', inset: 0, zIndex: 99 }} onClick={() => setOpenMenuId(null)} />
+            )}
+
 
             {/* ================= SIDEBAR ================= */}
-
-            <aside className="customers-sidebar">
-
-                <div className="customers-logo">
-                    <h2>Mini CRM</h2>
-                    <span>CRM</span>
-                </div>
-
-
-                <div className="sidebar-section">
-
-                    <p className="sidebar-title">
-                        WORKSPACE
-                    </p>
-
-                    <button
-                        className="sidebar-item"
-                        onClick={() => navigate("/dashboard")}
-                    >
-                        <span>▦</span>
-                        Overview
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>◎</span>
-                        Leads
-                    </button>
-
-                    <button className="sidebar-item active">
-                        <span>●</span>
-                        Customers
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>◇</span>
-                        Deals
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>✓</span>
-                        Tasks
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>◷</span>
-                        Activities
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>▤</span>
-                        Reports
-                    </button>
-
-                </div>
-
-
-                <div className="sidebar-section">
-
-                    <p className="sidebar-title">
-                        MANAGE
-                    </p>
-
-                    <button className="sidebar-item">
-                        <span>⚙</span>
-                        Settings
-                    </button>
-
-                    <button className="sidebar-item">
-                        <span>♙</span>
-                        Team Members
-                    </button>
-
-                    <button
-                        className="sidebar-item logout-item"
-                        onClick={() => {
-
-                            localStorage.removeItem("user");
-
-                            navigate("/login");
-                        }}
-                    >
-                        <span>↪</span>
-                        Logout
-                    </button>
-
-                </div>
-
-            </aside>
-
+            <Sidebar active="/customers" />
 
             {/* ================= MAIN CONTENT ================= */}
+
 
             <main className="customers-content">
 
@@ -338,18 +339,13 @@ const filteredCustomers = customers.filter((customer) => {
 
                         <div className="stat-card">
 
-                            <p>New This Month</p>
+                            <p>InActive Customers</p>
 
-                            <h2>86</h2>
-
-                        </div>
-
-
-                        <div className="stat-card">
-
-                            <p>Growth</p>
-
-                            <h2>+12.4%</h2>
+                            <h2>
+                                {customers.filter(
+                                    customer => customer.status === "Inactive"
+                                ).length}
+                            </h2>
 
                         </div>
 
@@ -386,13 +382,8 @@ const filteredCustomers = customers.filter((customer) => {
 >
     <option value="All">All</option>
     <option value="Active">Active</option>
-    <option value="Lead">Lead</option>
-    <option value="Inactive">Inactive</option>
+    <option value="Inactive">InActive</option>
 </select>
-                            <button className="sort-btn">
-                                Sort
-                            </button>
-
                         </div>
 
 
@@ -410,7 +401,7 @@ const filteredCustomers = customers.filter((customer) => {
                                 <span>Phone</span>
                                 <span>Company</span>
                                 <span>Status</span>
-                                <span>Deals</span>
+                                <span>Balance</span>
                                 <span>Actions</span>
 
                             </div>
@@ -448,15 +439,27 @@ const filteredCustomers = customers.filter((customer) => {
                                                 : "lead-status"
                                         }`}
                                     >
-                                        {customer.status}
+                                        {customer.status === "Inactive" ? "InActive" : customer.status}
                                     </span>
 
-                                    <span>
-                                        {customer.deals}
+                                    <span className="customer-balance">
+                                        ${(customer.balance ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </span>
 
                                     <span className="customer-actions">
-                                        ⋮
+                                        <span className="action-menu">
+                                            <button
+                                                className="action-menu-btn"
+                                                onClick={() => setOpenMenuId(openMenuId === customer._id ? null : customer._id)}
+                                            >⋮</button>
+                                            {openMenuId === customer._id && (
+                                                <div className="action-dropdown">
+                                                    <button className="edit-option" onClick={() => { handleEdit(customer); setOpenMenuId(null); }}>✏ Edit</button>
+                                                        <button className="purchase-option" onClick={() => { openPurchases(customer); setOpenMenuId(null); }}>🛒 Purchases</button>
+                                                    <button className="delete-option" onClick={() => { handleDelete(customer._id); setOpenMenuId(null); }}>🗑 Delete</button>
+                                                </div>
+                                            )}
+                                        </span>
                                     </span>
 
                                 </div>
@@ -480,28 +483,17 @@ const filteredCustomers = customers.filter((customer) => {
                                 {/* MODAL HEADER */}
 
                                 <div className="modal-header">
-
                                     <div>
-
-                                        <h2>
-                                            Add New Customer
-                                        </h2>
-
-                                        <p>
-                                            Add a new customer to your CRM.
-                                        </p>
-
+                                        <h2>{editCustomer ? "Edit Customer" : "Add New Customer"}</h2>
+                                        <p>{editCustomer ? "Update customer details." : "Add a new customer to your CRM."}</p>
                                     </div>
-
-
                                     <button
                                         type="button"
                                         className="close-modal-btn"
-                                        onClick={() => setShowModal(false)}
+                                        onClick={() => { setShowModal(false); setEditCustomer(null); setSubmitError(""); }}
                                     >
                                         ×
                                     </button>
-
                                 </div>
 
 
@@ -616,7 +608,7 @@ const filteredCustomers = customers.filter((customer) => {
                                         <div className="form-group">
 
                                             <label>
-                                                Company
+                                                Company Name
                                             </label>
 
                                             <input
@@ -690,12 +682,16 @@ const filteredCustomers = customers.filter((customer) => {
 
                                     {/* BUTTONS */}
 
+                                    {submitError && (
+                                        <p className="error" style={{ marginBottom: "8px", textAlign: "center" }}>{submitError}</p>
+                                    )}
+
                                     <div className="modal-actions">
 
                                         <button
                                             type="button"
                                             className="cancel-btn"
-                                            onClick={() => setShowModal(false)}
+                                            onClick={() => { setShowModal(false); setSubmitError(""); }}
                                         >
                                             Cancel
                                         </button>
@@ -716,6 +712,47 @@ const filteredCustomers = customers.filter((customer) => {
 
                         </div>
 
+                    )}
+
+                    {purchaseCustomer && (
+                        <div className="modal-overlay" onClick={() => setPurchaseCustomer(null)}>
+                            <div className="customer-modal purchase-modal" onClick={event => event.stopPropagation()}>
+                                <div className="modal-header">
+                                    <div>
+                                        <h2>Purchases</h2>
+                                        <p>{purchaseCustomer.name}'s purchase history</p>
+                                    </div>
+                                    <button type="button" className="close-modal-btn" onClick={() => setPurchaseCustomer(null)}>×</button>
+                                </div>
+
+                                <div className="purchase-history">
+                                    {purchases.length === 0 ? (
+                                        <p className="purchase-empty">No purchases yet.</p>
+                                    ) : purchases.map(purchase => (
+                                        <div className="purchase-row" key={purchase._id}>
+                                            <span>{purchase.title}</span>
+                                            <strong>${purchase.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <form className="customer-form purchase-form" onSubmit={handlePurchaseSubmit}>
+                                    <h3>Add New Purchase</h3>
+                                    <div className="form-group">
+                                        <label>Title</label>
+                                        <input value={purchaseForm.title} onChange={event => setPurchaseForm({ ...purchaseForm, title: event.target.value })} placeholder="Purchase title" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Amount</label>
+                                        <input type="number" min="0" step="0.01" value={purchaseForm.amount} onChange={event => setPurchaseForm({ ...purchaseForm, amount: event.target.value })} placeholder="0.00" />
+                                    </div>
+                                    {purchaseError && <p className="error">{purchaseError}</p>}
+                                    <div className="modal-actions">
+                                        <button type="submit" className="save-customer-btn">Add New Purchase</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     )}
 
                 </div>

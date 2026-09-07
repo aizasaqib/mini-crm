@@ -29,18 +29,6 @@ function Login() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // ======================================================
-  // PASSWORD REQUIREMENTS
-  // ======================================================
-
-  const passwordRequirements = {
-    minLength: formData.password.length >= 8,
-    uppercase: /[A-Z]/.test(formData.password),
-    lowercase: /[a-z]/.test(formData.password),
-    number: /[0-9]/.test(formData.password),
-    special: /[^A-Za-z0-9]/.test(formData.password),
-  };
-
   const handleForgotPassword = () => {
   const email = formData.email.trim();
 
@@ -372,9 +360,9 @@ if (!response.ok) {
             </div>
 
 
-            {/* ==================================================
+              {/* ==================================================
                 PASSWORD
-            ================================================== */}
+              ================================================== */}
 
             <div className="input-group">
 
@@ -426,72 +414,6 @@ if (!response.ok) {
                 </span>
               )}
 
-
-              {/* ==================================================
-                  PASSWORD REQUIREMENTS
-              ================================================== */}
-
-              <div className="password-requirements">
-
-                <h4>
-                  Password requirements:
-                </h4>
-
-                <ul>
-
-                  <li
-                    className={
-                      passwordRequirements.minLength
-                        ? "requirement-valid"
-                        : "requirement-invalid"
-                    }
-                  >
-                    At least 8 characters
-                  </li>
-
-                  <li
-                    className={
-                      passwordRequirements.uppercase
-                        ? "requirement-valid"
-                        : "requirement-invalid"
-                    }
-                  >
-                    At least one uppercase letter
-                  </li>
-
-                  <li
-                    className={
-                      passwordRequirements.lowercase
-                        ? "requirement-valid"
-                        : "requirement-invalid"
-                    }
-                  >
-                    At least one lowercase letter
-                  </li>
-
-                  <li
-                    className={
-                      passwordRequirements.number
-                        ? "requirement-valid"
-                        : "requirement-invalid"
-                    }
-                  >
-                    At least one number
-                  </li>
-
-                  <li
-                    className={
-                      passwordRequirements.special
-                        ? "requirement-valid"
-                        : "requirement-invalid"
-                    }
-                  >
-                    At least one special character
-                  </li>
-
-                </ul>
-
-              </div>
 
             </div>
 

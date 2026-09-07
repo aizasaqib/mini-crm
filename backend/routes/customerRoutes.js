@@ -9,6 +9,8 @@ router.use(authMiddleware);
 // CRUD routes for customers
 router.post('/', customerController.createCustomer);
 router.get('/', customerController.getCustomers);
+router.get('/:id/purchases', customerController.getCustomerPurchases);
+router.post('/:id/purchases', customerController.createCustomerPurchase);
 router.get('/:id', customerController.getCustomerById);
 router.put('/:id', customerController.updateCustomer);
 router.delete('/:id', customerController.deleteCustomer);

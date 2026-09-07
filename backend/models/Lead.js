@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const customerSchema = new mongoose.Schema({
+const leadSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -9,7 +9,6 @@ const customerSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     lowercase: true
   },
@@ -17,19 +16,14 @@ const customerSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  company: {
-    type: String,
-    trim: true
-  },
   status: {
     type: String,
-    enum: ['Active', 'Lead', 'Inactive'],
-    default: 'Active'
+    enum: ['New', 'Negotiation', 'Qualified', 'Lost'],
+    default: 'New'
   },
-  deals: {
-    type: Number,
-    default: 0
+  negotiationDate: {
+    type: Date
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Customer', customerSchema);
+module.exports = mongoose.model('Lead', leadSchema);
