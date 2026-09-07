@@ -4,6 +4,16 @@ import "../styles/Customers.css";
 import "../styles/Reports.css";
 import Sidebar from "../components/Sidebar";
 
+const getUser = () => {
+  try {
+    const user = localStorage.getItem("user");
+    if (!user || user === "undefined" || user === "null") return {};
+    return JSON.parse(user);
+  } catch {
+    return {};
+  }
+};
+
 const Reports = () => {
   const navigate = useNavigate();
 
