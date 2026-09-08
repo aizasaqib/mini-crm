@@ -56,6 +56,7 @@ const Tasks = () => {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // ── fetch all tasks ───────────────────────────────────────
   const fetchTasks = async () => {
@@ -151,6 +152,7 @@ const Tasks = () => {
       if (res.ok) {
         fetchTasks();
         closeModal();
+        setSuccessMessage(editingTask ? "Task updated successfully." : "Task added successfully.");
       } else {
         const err = await res.json().catch(() => ({}));
         setSubmitError(err.message || "Failed to save task");
@@ -162,7 +164,6 @@ const Tasks = () => {
 
   // ── delete ────────────────────────────────────────────────
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this task?")) return;
     try {
       const token = getToken();
       if (!token) { navigate("/login"); return; }
@@ -170,10 +171,13 @@ const Tasks = () => {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.ok) fetchTasks();
-      else alert("Failed to delete task.");
+      if (res.ok) {
+        fetchTasks();
+        setSuccessMessage("Task deleted successfully.");
+      }
+      else setSubmitError("Failed to delete task.");
     } catch {
-      alert("Network error.");
+      setSubmitError("Network error.");
     }
     setActiveMenu(null);
   };
@@ -229,6 +233,7 @@ const Tasks = () => {
               <h1>Tasks</h1>
               <p>Manage your tasks and stay on top of your work.</p>
             </div>
+            {successMessage && <p className="action-success-message">{successMessage}</p>}
             <button className="add-customer-btn" onClick={openAddModal}>
               <FaPlus style={{ marginRight: 8, fontSize: 13 }} />
               Add Task

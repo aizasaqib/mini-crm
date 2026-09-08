@@ -27,6 +27,7 @@ const Customers = () => {
     const [purchases, setPurchases] = useState([]);
     const [purchaseForm, setPurchaseForm] = useState({ title: "", amount: "" });
     const [purchaseError, setPurchaseError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     
 
     // Customer list
@@ -92,7 +93,6 @@ const Customers = () => {
 
     // Delete a customer
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this customer? This cannot be undone.")) return;
         try {
             const token = getToken();
             if (!token) { navigate("/login"); return; }
@@ -102,11 +102,12 @@ const Customers = () => {
             });
             if (res.ok) {
                 fetchCustomers();
+                setSuccessMessage("Customer deleted successfully.");
             } else {
-                alert("Failed to delete customer.");
+                setSubmitError("Failed to delete customer.");
             }
         } catch {
-            alert("Network error while deleting.");
+            setSubmitError("Network error while deleting.");
         }
     };
 
@@ -153,6 +154,7 @@ const Customers = () => {
             }));
             setPurchaseForm({ title: "", amount: "" });
             setPurchaseError("");
+            setSuccessMessage("Purchase added successfully.");
         } catch {
             setPurchaseError("Network error while adding purchase.");
         }
@@ -204,6 +206,7 @@ const Customers = () => {
 
     e.preventDefault();
     setSubmitError("");
+    setSuccessMessage("");
 
     if (!validateForm()) return;
 
@@ -237,6 +240,7 @@ const Customers = () => {
             setSubmitError("");
             setEditCustomer(null);
             setShowModal(false);
+            setSuccessMessage(editCustomer ? "Customer updated successfully." : "Customer added successfully.");
         } else {
             const errData = await res.json().catch(() => ({}));
             setSubmitError(errData.message || `Error ${res.status}: Failed to save customer`);
@@ -297,6 +301,7 @@ const filteredCustomers = customers.filter((customer) => {
                         </div>
 
 
+                        {successMessage && <p className="action-success-message">{successMessage}</p>}
                         <button
                             className="add-customer-btn"
                             onClick={() => setShowModal(true)}
@@ -389,7 +394,7 @@ const filteredCustomers = customers.filter((customer) => {
 
                         {/* TABLE */}
 
-                        <div className="customers-table">
+                        <div className="customers-table customer-list">
 
 
                             {/* TABLE HEADER */}
@@ -747,6 +752,7 @@ const filteredCustomers = customers.filter((customer) => {
                                         <input type="number" min="0" step="0.01" value={purchaseForm.amount} onChange={event => setPurchaseForm({ ...purchaseForm, amount: event.target.value })} placeholder="0.00" />
                                     </div>
                                     {purchaseError && <p className="error">{purchaseError}</p>}
+                                    {successMessage && <p className="action-success-message">{successMessage}</p>}
                                     <div className="modal-actions">
                                         <button type="submit" className="save-customer-btn">Add New Purchase</button>
                                     </div>

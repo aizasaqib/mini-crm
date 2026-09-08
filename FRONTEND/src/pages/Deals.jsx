@@ -66,6 +66,7 @@ const Deals = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [successMessage, setSuccessMessage] = useState("");
 
     const handleEdit = (deal) => {
         setFormData({
@@ -80,7 +81,6 @@ const Deals = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this deal?")) return;
         try {
             const token = getToken();
             if (!token) { navigate("/login"); return; }
@@ -88,9 +88,12 @@ const Deals = () => {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
-            if (res.ok) fetchDeals();
-            else alert("Failed to delete deal.");
-        } catch { alert("Network error."); }
+            if (res.ok) {
+                fetchDeals();
+                setSuccessMessage("Deal deleted successfully.");
+            }
+            else setErrors({ general: "Failed to delete deal." });
+        } catch { setErrors({ general: "Network error." }); }
     };
 
     const validateForm = () => {
@@ -112,6 +115,7 @@ const Deals = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
+        setSuccessMessage("");
 
         try {
             const token = getToken();
@@ -139,11 +143,14 @@ const Deals = () => {
                 setErrors({});
                 setEditDeal(null);
                 setShowModal(false);
+                setSuccessMessage(editDeal ? "Deal updated successfully." : "Deal added successfully.");
             } else {
-                console.error("Failed to save deal");
+                const data = await res.json().catch(() => ({}));
+                setErrors({ general: data.message || "Failed to save deal" });
             }
         } catch (error) {
             console.error("Error adding deal", error);
+            setErrors({ general: "Unable to connect to the server" });
         }
     };
 
@@ -173,6 +180,7 @@ const Deals = () => {
                             <h1>Deals</h1>
                             <p>Track your pipeline and closed deals.</p>
                         </div>
+                        {successMessage && <p className="action-success-message">{successMessage}</p>}
                         <button className="add-customer-btn" onClick={() => setShowModal(true)}>+ Add Deal</button>
                     </div>
 
@@ -292,6 +300,7 @@ const Deals = () => {
                                             <option value="Closed Lost">Closed Lost</option>
                                         </select>
                                     </div>
+                                    {errors.general && <p className="error">{errors.general}</p>}
                                     <div className="modal-actions">
                                         <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
                                         <button type="submit" className="save-customer-btn">Add Deal</button>

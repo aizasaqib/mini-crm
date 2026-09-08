@@ -8,6 +8,17 @@
     background: #f7f8fc;
 }
 
+.action-success-message {
+    margin: 0 0 0 auto;
+    padding: 10px 14px;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
 
 /* =========================================
    SIDEBAR
@@ -412,6 +423,14 @@
 .customers-table {
     width: 100%;
     overflow-x: auto;
+}
+
+.customers-table.leads-table {
+    overflow: visible;
+}
+
+.customers-table.customer-list {
+    overflow: visible;
 }
 
 .deals-table-wrap {

@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 
 function ProtectedRoute({ children }) {
+<<<<<<< HEAD
   let user = null;
 
   try {
@@ -12,9 +13,18 @@ function ProtectedRoute({ children }) {
   } catch {
     user = null;
   }
+=======
+  let token = null;
+>>>>>>> bd323aaf56ea9dadd951c0160c895f57a194209b
 
-  // User is not logged in
-  if (!user) {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    token = user?.token || null;
+  } catch {
+    token = null;
+  }
+
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
 

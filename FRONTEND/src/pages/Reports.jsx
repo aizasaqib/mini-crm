@@ -17,9 +17,7 @@ const getUser = () => {
 const Reports = () => {
   const navigate = useNavigate();
 
-  const [data, setData]       = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState("");
+  const [data, setData]       = useState({});
 
   const getToken = () => {
     try {
@@ -28,27 +26,24 @@ const Reports = () => {
   };
 
   // ── fetch aggregate report ────────────────────────────────
-  useEffect(() => {
-    const fetchReport = async () => {
-      try {
-        const token = getToken();
-        if (!token) { navigate("/login"); return; }
+  const fetchReport = async () => {
+    try {
+      const token = getToken();
+      if (!token) { navigate("/login"); return; }
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reports`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reports`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
-        if (res.ok) {
-          setData(await res.json());
-        } else {
-          setError("Failed to load report data.");
-        }
-      } catch {
-        setError("Network error. Please try again.");
-      } finally {
-        setLoading(false);
+      if (res.ok) {
+        setData(await res.json());
       }
-    };
+    } catch {
+      // Keep the report page visible with the last available data.
+    }
+  };
+
+  useEffect(() => {
     fetchReport();
   }, []);
 
@@ -77,36 +72,6 @@ const Reports = () => {
     "Follow-up": "#ec4899",
   };
 
-  // ── loading / error states ────────────────────────────────
-  if (loading) {
-    return (
-      <div className="customers-layout">
-        <Sidebar active="/reports" />
-        <main className="customers-content">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#667085", flexDirection: "column", gap: 14 }}>
-            <div className="report-spinner" />
-            <p style={{ fontSize: 16 }}>Loading report data…</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="customers-layout">
-        <Sidebar active="/reports" />
-        <main className="customers-content">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#ef4444", flexDirection: "column", gap: 14 }}>
-            <p style={{ fontSize: 22 }}>⚠️</p>
-            <p style={{ fontSize: 16 }}>{error}</p>
-            <button className="add-customer-btn" onClick={() => window.location.reload()}>Retry</button>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   const { customers, leads, deals, tasks, activities } = data;
 
   // total deal pipeline max for percentage bars
@@ -133,7 +98,7 @@ const Reports = () => {
               <h1>Reports</h1>
               <p>A complete snapshot of your CRM activity.</p>
             </div>
-            <button className="add-customer-btn" onClick={() => window.location.reload()}>
+            <button className="add-customer-btn" onClick={fetchReport}>
               ↻ Refresh
             </button>
           </div>
