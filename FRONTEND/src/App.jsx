@@ -24,7 +24,6 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 function PublicRoute({ children }) {
-<<<<<<< HEAD
   let hasValidUser = false;
   try {
     const storedUser = localStorage.getItem("user");
@@ -42,8 +41,6 @@ function PublicRoute({ children }) {
     return <Navigate to="/dashboard" replace />;
   }
 
-=======
->>>>>>> bd323aaf56ea9dadd951c0160c895f57a194209b
   return children;
 }
 
