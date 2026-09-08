@@ -53,6 +53,7 @@ const Activities = () => {
   const [formData, setFormData]   = useState(initialForm);
   const [errors, setErrors]       = useState({});
   const [submitError, setSubmitError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // ── fetch ─────────────────────────────────────────────────
   const fetchActivities = async () => {
@@ -135,7 +136,11 @@ const Activities = () => {
         body: JSON.stringify(formData)
       });
 
-      if (res.ok) { fetchActivities(); closeModal(); }
+      if (res.ok) {
+        fetchActivities();
+        closeModal();
+        setSuccessMessage(editActivity ? "Activity updated successfully." : "Activity added successfully.");
+      }
       else {
         const err = await res.json().catch(() => ({}));
         setSubmitError(err.message || "Failed to save activity");
@@ -147,16 +152,18 @@ const Activities = () => {
 
   // ── delete ────────────────────────────────────────────────
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this activity?")) return;
     try {
       const token = getToken();
       const res = await fetch(`${API}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       });
-      if (res.ok) fetchActivities();
-      else alert("Failed to delete.");
-    } catch { alert("Network error."); }
+      if (res.ok) {
+        fetchActivities();
+        setSuccessMessage("Activity deleted successfully.");
+      }
+      else setSubmitError("Failed to delete activity.");
+    } catch { setSubmitError("Network error."); }
     setOpenMenuId(null);
   };
 
@@ -204,6 +211,7 @@ const Activities = () => {
               <h1>Activities</h1>
               <p>Track every interaction — calls, emails, meetings and more.</p>
             </div>
+            {successMessage && <p className="action-success-message">{successMessage}</p>}
             <button className="add-customer-btn" onClick={openAddModal}>+ Log Activity</button>
           </div>
 

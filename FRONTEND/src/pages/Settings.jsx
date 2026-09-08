@@ -64,19 +64,38 @@ const Settings = () => {
   };
 
   // ── Profile ───────────────────────────────────────────────
-  const [profile, setProfile] = useState({ fullName: "", email: "", phone: "" });
+  const [profile, setProfile] = useState({
+    fullName: user.fullName || "",
+    email: user.email || "",
+    phone: user.phone || "",
+  });
   const [profileLoading, setProfileLoading] = useState(false);
 
   useEffect(() => {
     if (!token) { navigate("/login"); return; }
-    fetch(`${BASE}/api/profile`, { headers: hdrs })
-      .then(r => r.json())
-      .then(d => {
-        if (d._id) {
-          setProfile({ fullName: d.fullName || "", email: d.email || "", phone: d.phone || "" });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+
+    fetch(`${BASE}/api/profile`, { headers: hdrs, signal: controller.signal })
+      .then(response => response.ok ? response.json() : null)
+      .then(data => {
+        if (data?._id) {
+          setProfile({
+            fullName: data.fullName || "",
+            email: data.email || "",
+            phone: data.phone || "",
+          });
         }
       })
-      .catch(() => showToast("Could not load profile", "error"));
+      .catch(() => {
+        // Keep the cached login profile visible when the API is unavailable.
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, []);
 
   const saveProfile = async () => {

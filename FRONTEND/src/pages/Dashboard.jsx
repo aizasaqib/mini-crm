@@ -34,7 +34,6 @@ function Dashboard() {
   const [report,  setReport]  = useState(null);
   const [leads,   setLeads]   = useState([]);
   const [tasks,   setTasks]   = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showLeadModal, setShowLeadModal] = useState(false);
   const [leadForm, setLeadForm] = useState({
     name: "", email: "", phone: "", status: "New", negotiationDate: ""
@@ -57,8 +56,7 @@ function Dashboard() {
       setReport(rep);
       setLeads(Array.isArray(leds) ? leds.slice(0, 5) : []);
       setTasks(Array.isArray(tks)  ? tks.slice(0, 5)  : []);
-    }).catch(console.error)
-      .finally(() => setLoading(false));
+    }).catch(console.error);
   }, []);
 
   const handleLeadChange = (event) => {
@@ -137,20 +135,6 @@ function Dashboard() {
   };
 
   const formatDate = d => d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "-";
-
-  if (loading) {
-    return (
-      <div className="customers-layout">
-        <Sidebar active="/dashboard" />
-        <main className="customers-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ textAlign: "center", color: "#667085" }}>
-            <div className="report-spinner" style={{ margin: "0 auto 16px" }} />
-            <p>Loading dashboard…</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="customers-layout">

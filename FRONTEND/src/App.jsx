@@ -1,9 +1,8 @@
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 
 import Login from "./pages/Login";
@@ -25,15 +24,6 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 function PublicRoute({ children }) {
-
-  const user = localStorage.getItem("user");
-
-  // If already logged in, don't allow access
-  // to login/register/reset pages.
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return children;
 }
 
@@ -42,7 +32,7 @@ function App() {
 
   return (
 
-    <BrowserRouter>
+    <HashRouter>
 
       <Routes>
 
@@ -146,12 +136,12 @@ function App() {
         />
 
 
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/leads" element={<Leads />} />
-        <Route path="/deals" element={<Deals />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route path="/reports" element={<Reports />} />
+        <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+        <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+        <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+        <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
         {/* =========================
@@ -170,7 +160,7 @@ function App() {
 
       </Routes>
 
-    </BrowserRouter>
+    </HashRouter>
 
   );
 }

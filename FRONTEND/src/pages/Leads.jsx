@@ -60,6 +60,7 @@ const Leads = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [successMessage, setSuccessMessage] = useState("");
 
     const handleEdit = (lead) => {
         setFormData({
@@ -77,7 +78,6 @@ const Leads = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this lead?")) return;
         try {
             const token = getToken();
             if (!token) { navigate("/login"); return; }
@@ -85,9 +85,12 @@ const Leads = () => {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${token}` }
             });
-            if (res.ok) fetchLeads();
-            else alert("Failed to delete lead.");
-        } catch { alert("Network error."); }
+            if (res.ok) {
+                fetchLeads();
+                setSuccessMessage("Lead deleted successfully.");
+            }
+            else setErrors({ general: "Failed to delete lead." });
+        } catch { setErrors({ general: "Network error." }); }
     };
 
     const validateForm = () => {
@@ -113,6 +116,7 @@ const Leads = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
+        setSuccessMessage("");
 
         try {
             const token = getToken();
@@ -126,7 +130,12 @@ const Leads = () => {
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    negotiationDate: formData.status === "Negotiation" && formData.negotiationDate
+                        ? new Date(formData.negotiationDate).toISOString()
+                        : undefined,
+                })
             });
 
             if (res.ok) {
@@ -135,11 +144,14 @@ const Leads = () => {
                 setErrors({});
                 setEditLead(null);
                 setShowModal(false);
+                setSuccessMessage(editLead ? "Lead updated successfully." : "Lead added successfully.");
             } else {
-                console.error("Failed to save lead");
+                const data = await res.json().catch(() => ({}));
+                setErrors({ general: data.message || "Failed to save lead" });
             }
         } catch (error) {
             console.error("Error adding lead", error);
+            setErrors({ general: "Unable to connect to the server" });
         }
     };
 
@@ -171,6 +183,7 @@ const Leads = () => {
                             <h1>Leads</h1>
                             <p>Manage and keep track of your new sales opportunities.</p>
                         </div>
+                        {successMessage && <p className="action-success-message">{successMessage}</p>}
                         <button className="add-customer-btn" onClick={() => setShowModal(true)}>+ Add Lead</button>
                     </div>
 
@@ -209,7 +222,7 @@ const Leads = () => {
                             </select>
                         </div>
 
-                        <div className="customers-table">
+                        <div className="customers-table leads-table">
                             <div className="leads-table-head">
                                 <span>Lead</span>
                                 <span>Email</span>
@@ -289,6 +302,7 @@ const Leads = () => {
                                             />
                                         </div>
                                     )}
+                                    {errors.general && <p className="error">{errors.general}</p>}
                                     <div className="modal-actions">
                                         <button type="button" className="cancel-btn" onClick={() => setShowModal(false)}>Cancel</button>
                                         <button type="submit" className="save-customer-btn">Add Lead</button>
