@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -36,6 +36,12 @@ function Register() {
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (!successMessage) return undefined;
+    const timer = setTimeout(() => setSuccessMessage(""), 3000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
   // ======================================================
   // PASSWORD REQUIREMENTS
   // ======================================================
@@ -70,10 +76,15 @@ function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const nextValue = name === "phone"
+      ? value.replace(/[^0-9+()\s-]/g, "")
+      : name === "fullName"
+        ? value.replace(/[^A-Za-z\s.'-]/g, "")
+        : value;
 
     setFormData((previousData) => ({
       ...previousData,
-      [name]: value,
+      [name]: nextValue,
     }));
 
     // Clear field error while typing
@@ -96,6 +107,8 @@ function Register() {
     // Full name
     if (!formData.fullName.trim()) {
       newErrors.fullName = "Full name is required";
+    } else if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(formData.fullName.trim())) {
+      newErrors.fullName = "Use letters and spaces only";
     }
 
     // Email
@@ -114,6 +127,8 @@ function Register() {
     // Phone
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
+    } else if (!/^[0-9+()\s-]+$/.test(formData.phone.trim()) || (formData.phone.match(/\d/g) || []).length < 7) {
+      newErrors.phone = "Enter a valid phone number";
     }
 
     // Password
@@ -444,6 +459,7 @@ setTimeout(() => {
               <input
                 type="text"
                 name="phone"
+                inputMode="tel"
                 placeholder="Enter your phone number"
                 value={formData.phone}
                 onChange={handleChange}

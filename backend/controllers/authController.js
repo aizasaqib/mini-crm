@@ -30,6 +30,20 @@ const registerUser = async (req, res) => {
       });
     }
 
+    if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(fullName.trim())) {
+      return res.status(400).json({
+        message: "Full name may contain letters, spaces, apostrophes, periods, and hyphens only",
+      });
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({ message: "Please provide a valid email address" });
+    }
+
+    if (!/^[0-9+()\s-]+$/.test(phone.trim()) || (phone.match(/\d/g) || []).length < 7) {
+      return res.status(400).json({ message: "Please provide a valid phone number" });
+    }
+
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Passwords do not match",

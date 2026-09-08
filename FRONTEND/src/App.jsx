@@ -25,12 +25,20 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 function PublicRoute({ children }) {
-
-  const user = localStorage.getItem("user");
+  let hasValidUser = false;
+  try {
+    const storedUser = localStorage.getItem("user");
+    const parsedUser = storedUser && storedUser !== "undefined" && storedUser !== "null"
+      ? JSON.parse(storedUser)
+      : null;
+    hasValidUser = Boolean(parsedUser?.token);
+  } catch {
+    hasValidUser = false;
+  }
 
   // If already logged in, don't allow access
   // to login/register/reset pages.
-  if (user) {
+  if (hasValidUser) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -146,12 +154,12 @@ function App() {
         />
 
 
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/leads" element={<Leads />} />
-        <Route path="/deals" element={<Deals />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/activities" element={<Activities />} />
-        <Route path="/reports" element={<Reports />} />
+        <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+        <Route path="/leads" element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+        <Route path="/deals" element={<ProtectedRoute><Deals /></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
+        <Route path="/activities" element={<ProtectedRoute><Activities /></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
         {/* =========================
